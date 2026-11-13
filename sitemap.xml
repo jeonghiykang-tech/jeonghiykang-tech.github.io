@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://jeonghiykang-tech.github.io/</loc>
     <lastmod>2026-11-13</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://jeonghiykang-tech.github.io/"/>
     <xhtml:link rel="alternate" hreflang="ko" href="https://jeonghiykang-tech.github.io/ko.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://jeonghiykang-tech.github.io/"/>
-    <image:image><image:loc>https://jeonghiykang-tech.github.io/michelle-liu.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://jeonghiykang-tech.github.io/ko.html</loc>
@@ -14,6 +13,33 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://jeonghiykang-tech.github.io/"/>
     <xhtml:link rel="alternate" hreflang="ko" href="https://jeonghiykang-tech.github.io/ko.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://jeonghiykang-tech.github.io/"/>
-    <image:image><image:loc>https://jeonghiykang-tech.github.io/michelle-liu.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://jeonghiykang-tech.github.io/usmca-cusma-rules-of-origin-steel-auto-parts.html</loc>
+    <lastmod>2026-11-13</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jeonghiykang-tech.github.io/usmca-cusma-rules-of-origin-steel-auto-parts.html"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://jeonghiykang-tech.github.io/ko-usmca-cusma-wonsanji.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://jeonghiykang-tech.github.io/usmca-cusma-rules-of-origin-steel-auto-parts.html"/>
+  </url>
+  <url>
+    <loc>https://jeonghiykang-tech.github.io/ko-usmca-cusma-wonsanji.html</loc>
+    <lastmod>2026-11-13</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jeonghiykang-tech.github.io/usmca-cusma-rules-of-origin-steel-auto-parts.html"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://jeonghiykang-tech.github.io/ko-usmca-cusma-wonsanji.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://jeonghiykang-tech.github.io/usmca-cusma-rules-of-origin-steel-auto-parts.html"/>
+  </url>
+  <url>
+    <loc>https://jeonghiykang-tech.github.io/section-232-steel-auto-parts-2026.html</loc>
+    <lastmod>2026-11-13</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jeonghiykang-tech.github.io/section-232-steel-auto-parts-2026.html"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://jeonghiykang-tech.github.io/ko-232-gwanse-cheolgang-jadongcha.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://jeonghiykang-tech.github.io/section-232-steel-auto-parts-2026.html"/>
+  </url>
+  <url>
+    <loc>https://jeonghiykang-tech.github.io/ko-232-gwanse-cheolgang-jadongcha.html</loc>
+    <lastmod>2026-11-13</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jeonghiykang-tech.github.io/section-232-steel-auto-parts-2026.html"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://jeonghiykang-tech.github.io/ko-232-gwanse-cheolgang-jadongcha.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://jeonghiykang-tech.github.io/section-232-steel-auto-parts-2026.html"/>
   </url>
 </urlset>
