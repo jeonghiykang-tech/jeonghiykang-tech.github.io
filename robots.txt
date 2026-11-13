@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jeonghiykang-tech.github.io/sitemap.xml
