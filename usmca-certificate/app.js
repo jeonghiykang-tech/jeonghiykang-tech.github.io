@@ -31,9 +31,9 @@ function setStatus(el, msg, kind = "info", spin = false) {
 function hsDigits(h) { return String(h || "").replace(/\D/g, ""); }
 
 /* ---------------- stepper ---------------- */
-function goto(n) {
-  if (n >= 3 && !validateStep2()) return;
-  if (n === 4 && !validateStep3()) return;
+function goto(n, free = false) {
+  if (!free && n >= 3 && !validateStep2()) return;
+  if (!free && n === 4 && !validateStep3()) return;
   for (let i = 1; i <= 4; i++) $("#step" + i).classList.toggle("hidden", i !== n);
   $$("#stepper li").forEach(li => {
     const s = +li.dataset.step;
@@ -47,8 +47,8 @@ $$("[data-goto]").forEach(b => b.addEventListener("click", () => goto(+b.dataset
 $$("#stepper li").forEach(li => {
   li.setAttribute("role", "button");
   li.tabIndex = 0;
-  li.addEventListener("click", () => goto(+li.dataset.step));
-  li.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goto(+li.dataset.step); } });
+  li.addEventListener("click", () => goto(+li.dataset.step, true));
+  li.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goto(+li.dataset.step, true); } });
 });
 
 /* ---------------- BOM table ---------------- */
@@ -529,6 +529,7 @@ function validateStep2() {
   if (problems.length) {
     if ($("#step2").classList.contains("hidden")) goto2Direct();
     setStatus(msg, "Please complete: " + problems.join(", ") + ".", "error");
+    msg.scrollIntoView({ behavior: "smooth", block: "center" });
     return false;
   }
   setStatus(msg, "", "info");
@@ -594,6 +595,7 @@ function validateStep3() {
       $$("#stepper li").forEach(li => { const s = +li.dataset.step; li.classList.toggle("active", s === 3); li.classList.toggle("done", s < 3); });
     }
     setStatus(msg, "Please fix: " + p.join("; ") + ".", "error");
+    msg.scrollIntoView({ behavior: "smooth", block: "center" });
     return false;
   }
   setStatus(msg, "", "info");
