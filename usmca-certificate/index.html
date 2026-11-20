@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free USMCA / CUSMA Certification of Origin Generator with Free Origin Check | Michelle Liu</title>
+<meta name="description" content="Upload your bill of materials, get a free preliminary USMCA/CUSMA rules-of-origin check (tariff shift, RVC, de minimis) (origin criterion, method of qualification, country of origin), then create and sign a USMCA Certification of Origin PDF.">
+<link rel="canonical" href="https://jeonghiykang-tech.github.io/usmca-certificate/">
+<link rel="stylesheet" href="styles.css">
+
+<!-- ============ GOOGLE ADSENSE ============
+  After AdSense approval, replace ca-pub-3091236865638643 with your publisher ID and remove the comment markers.
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3091236865638643" crossorigin="anonymous"></script>
+========================================= -->
+
+<!-- SheetJS (Excel reader). Official CDN build; local copy is the fallback. -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script>window.XLSX || document.write('<script src="vendor/xlsx.full.min.js"><\/script>')</script>
+<script src="vendor/pdf-lib.min.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <div>
+      <div class="brand">USMCA / CUSMA Certification of Origin</div>
+      <div class="tagline">BOM upload &rarr; AI origin check &rarr; signed certification PDF</div>
+    </div>
+    <a class="header-link" href="../">&larr; Home</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="disclaimer-banner" role="note">
+    <strong>Disclaimer:</strong> Product-specific rules of origin differ by product and tariff classification.
+    The origin check is a <em>preliminary</em> analysis only &mdash; please have a customs compliance professional or trade consultant review it before you sign.
+    <a href="#disclaimer">Read the full disclaimer</a>.
+  </div>
+
+  <!-- AD SLOT: top -->
+  <div class="ad-slot" aria-hidden="true">
+    <!-- <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3091236865638643" data-ad-slot="1111111111" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script> -->
+  </div>
+
+  <ol class="steps" id="stepper">
+    <li class="active" data-step="1">Origin check</li>
+    <li data-step="2">Parties</li>
+    <li data-step="3">Goods</li>
+    <li data-step="4">Sign &amp; download</li>
+  </ol>
+
+  <!-- ================= STEP 1 ================= -->
+  <section class="card" id="step1">
+    <h2>Step 1 &mdash; Free origin check</h2>
+    <p class="muted">Enter your finished product and its bill of materials. The free checker applies the USMCA product-specific rule for your HS code (built-in for chapters 72, 73 and 87), tests the tariff shift, regional value content and de minimis, and recommends the origin criterion (field 8), method of qualification (field 10) and country of origin (field 11).</p>
+
+    <div class="grid2">
+      <label class="full">Final product description <span class="req">*</span>
+        <textarea id="prodDesc" rows="2" placeholder="e.g. Laser-welded steel door inner blank for passenger vehicles"></textarea>
+      </label>
+      <label>HTS / HS code of the final product <span class="req">*</span>
+        <input id="prodHts" placeholder="e.g. 8708.29.5160">
+      </label>
+      <label>Country where the product is produced <span class="req">*</span>
+        <select id="prodCountry">
+          <option value="">Select&hellip;</option>
+          <option value="CA">Canada (CA)</option>
+          <option value="US">United States (US)</option>
+          <option value="MX">Mexico (MX)</option>
+        </select>
+      </label>
+      <label>Transaction value per unit (FOB) <span class="hint">for RVC (TV) and de minimis</span>
+        <input id="prodTV" type="number" step="0.0001" min="0" placeholder="e.g. 42.50">
+      </label>
+      <label>Net cost per unit <span class="hint">for RVC (NC) &mdash; required for automotive parts</span>
+        <input id="prodNC" type="number" step="0.0001" min="0" placeholder="e.g. 36.10">
+      </label>
+      <label>Total cost per unit <span class="hint">optional &mdash; alternative base for de minimis</span>
+        <input id="prodTC" type="number" step="0.0001" min="0" placeholder="e.g. 38.00">
+      </label>
+      <label>Currency
+        <select id="prodCur"><option>USD</option><option>CAD</option><option>MXN</option></select>
+      </label>
+      <label class="full">Production notes <span class="hint">optional &mdash; processes performed, supplier USMCA certifications on file, etc.</span>
+        <textarea id="prodNotes" rows="2"></textarea>
+      </label>
+    </div>
+
+    <div id="rulePanel" class="rule-panel hidden"></div>
+
+    <h3 class="sub">Bill of materials</h3>
+    <div class="dropzone" id="dropzone" tabindex="0">
+      <input type="file" id="bomFile" accept=".xlsx,.xls,.csv,.pdf" hidden>
+      <div class="dz-icon">&#8682;</div>
+      <div><strong>Drop your BOM here</strong> or click to choose a file</div>
+      <div class="muted small">Excel (.xlsx/.xls) or CSV is read automatically &middot; PDF: type the lines below or use &ldquo;Check with my Claude&rdquo; &middot; max 5 MB</div>
+      <div id="fileName" class="file-name"></div>
+    </div>
+    <div class="table-wrap">
+      <table class="goods bom" id="bomTable">
+        <thead><tr><th>Line</th><th>Part no.</th><th>Description</th><th>HTS code</th><th>Country of origin</th><th>USMCA originating?</th><th>Value per unit</th><th>Weight / unit (kg)</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="bomEmpty" class="muted small" style="padding:8px 2px">No lines yet &mdash; upload a file or add lines.</div>
+    <div class="actions left">
+      <button class="btn ghost tiny" id="bomAdd" type="button">+ Add line</button>
+      <button class="btn ghost tiny" id="bomClear" type="button">Clear</button>
+      <a href="#" id="dlTemplate" class="small" style="margin-left:auto">Download a BOM template (CSV)</a>
+    </div>
+    <p class="small muted">&ldquo;USMCA originating&rdquo; = Yes only when the supplier has certified the material as USMCA/CUSMA originating. A material made in the US, Canada or Mexico is <em>not</em> automatically originating. Weight is needed only for rules with a percent-by-weight test (e.g. some steel articles).</p>
+
+    <div id="turnstileBox" style="margin-top:10px"></div>
+    <div class="actions">
+      <button class="btn ghost" id="skipBtn" title="Skip and enter the goods manually">Skip &mdash; I already know the origin</button>
+      <button class="btn ghost" id="claudeBtn" title="Copies a ready-made prompt to paste into your own Claude account">Check with my Claude (free)</button>
+      <button class="btn ghost" id="aiBtn">AI check</button>
+      <button class="btn primary" id="freeCheckBtn">Check origin (free)</button>
+    </div>
+    <div id="analyzeStatus" class="status"></div>
+
+    <div id="result" class="result hidden"></div>
+  </section>
+
+  <!-- ================= STEP 2 ================= -->
+  <section class="card hidden" id="step2">
+    <h2>Step 2 &mdash; Certifier and parties</h2>
+
+    <fieldset class="box">
+      <legend>1. Certifier type</legend>
+      <div class="radio-row">
+        <label class="radio"><input type="radio" name="certType" value="IMPORTER"> Importer</label>
+        <label class="radio"><input type="radio" name="certType" value="EXPORTER"> Exporter</label>
+        <label class="radio"><input type="radio" name="certType" value="PRODUCER"> Producer</label>
+      </div>
+    </fieldset>
+
+    <fieldset class="box">
+      <legend>Blanket period <span class="hint">optional &mdash; identical goods, max 12 months</span></legend>
+      <div class="grid2">
+        <label>From <input type="date" id="blanketFrom"></label>
+        <label>To <input type="date" id="blanketTo"></label>
+      </div>
+      <div id="blanketMsg" class="field-error"></div>
+    </fieldset>
+
+    <div class="party-grid">
+      <fieldset class="box party" data-party="certifier">
+        <legend>2. Certifier</legend>
+        <label>Name <input data-f="name"></label>
+        <label>Title <input data-f="title" placeholder="e.g. Customs Compliance Manager"></label>
+        <label>Address <textarea data-f="address" rows="2"></textarea></label>
+        <div class="grid2"><label>Country <input data-f="country"></label><label>Phone <input data-f="phone"></label></div>
+        <label>Email <input data-f="email" type="email"></label>
+        <label>Tax identification number <input data-f="taxid"></label>
+      </fieldset>
+
+      <fieldset class="box party" data-party="exporter">
+        <legend>3. Exporter</legend>
+        <div class="copy-row"><button type="button" class="btn tiny" data-copy="exporter">Same as certifier</button>
+          <select class="tiny-select" data-special="exporter"><option value="">&mdash;</option><option>Unknown</option></select></div>
+        <label>Name <input data-f="name"></label>
+        <label>Address <span class="hint">place of export in a USMCA country</span><textarea data-f="address" rows="2"></textarea></label>
+        <div class="grid2"><label>Country <input data-f="country"></label><label>Phone <input data-f="phone"></label></div>
+        <label>Email <input data-f="email" type="email"></label>
+        <label>Tax identification number <input data-f="taxid"></label>
+      </fieldset>
+
+      <fieldset class="box party" data-party="producer">
+        <legend>4. Producer</legend>
+        <div class="copy-row"><button type="button" class="btn tiny" data-copy="producer">Same as certifier</button>
+          <select class="tiny-select" data-special="producer"><option value="">&mdash;</option><option>Various</option><option>Available upon request by the importing authorities</option><option>Unknown</option></select></div>
+        <label>Name <input data-f="name"></label>
+        <label>Address <span class="hint">place of production in a USMCA country</span><textarea data-f="address" rows="2"></textarea></label>
+        <div class="grid2"><label>Country <input data-f="country"></label><label>Phone <input data-f="phone"></label></div>
+        <label>Email <input data-f="email" type="email"></label>
+        <label>Tax identification number <input data-f="taxid"></label>
+      </fieldset>
+
+      <fieldset class="box party" data-party="importer">
+        <legend>5. Importer</legend>
+        <div class="copy-row"><button type="button" class="btn tiny" data-copy="importer">Same as certifier</button>
+          <select class="tiny-select" data-special="importer"><option value="">&mdash;</option><option>Various</option><option>Unknown</option></select></div>
+        <label>Name <input data-f="name"></label>
+        <label>Address <span class="hint">in a USMCA country</span><textarea data-f="address" rows="2"></textarea></label>
+        <div class="grid2"><label>Country <input data-f="country"></label><label>Phone <input data-f="phone"></label></div>
+        <label>Email <input data-f="email" type="email"></label>
+        <label>Tax identification number <input data-f="taxid"></label>
+      </fieldset>
+    </div>
+
+    <div class="actions">
+      <button class="btn ghost" data-goto="1">&larr; Back</button>
+      <button class="btn primary" data-goto="3">Next: goods &rarr;</button>
+    </div>
+    <div id="step2Msg" class="status"></div>
+  </section>
+
+  <!-- ================= STEP 3 ================= -->
+  <section class="card hidden" id="step3">
+    <h2>Step 3 &mdash; Goods (fields 6&ndash;11)</h2>
+    <p class="muted">Rows from the AI check are added here. You may edit them, add more goods, or run another origin check for a different product.</p>
+    <div class="table-wrap">
+      <table class="goods" id="goodsTable">
+        <thead><tr>
+          <th>6. Description of good(s)</th><th>7. HTS</th><th>8. Origin criterion</th>
+          <th>9. Producer (Yes/No)</th><th>10. Method of qualification</th><th>11. Country of origin</th><th></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="actions left">
+      <button class="btn ghost" id="addRow">+ Add a good manually</button>
+      <button class="btn ghost" id="anotherCheck">+ Run origin check for another product</button>
+    </div>
+    <details class="legend-box small">
+      <summary>Field guide</summary>
+      <p><strong>8. Origin criterion</strong> (USMCA Article 4.2): A &ndash; wholly obtained or produced entirely in a USMCA country; B &ndash; produced using non-originating materials that satisfy the product-specific rule (Annex 4-B); C &ndash; produced exclusively from originating materials; D &ndash; produced using non-originating parts that cannot meet the tariff shift only because they are classified with the good, and the RVC requirement is met.</p>
+      <p><strong>9. Producer</strong>: YES if the certifier is the producer of the good, otherwise NO.</p>
+      <p><strong>10. Method of qualification</strong>: TS &ndash; tariff shift; TV &ndash; regional value content by transaction value; NC &ndash; regional value content by net cost; NO &ndash; criterion A or C.</p>
+      <p><strong>11. Country of origin</strong>: ISO code US, CA or MX.</p>
+      <p><strong>De minimis</strong> (USMCA Article 4.12): a good can still qualify if the non-originating materials that fail the tariff shift are worth no more than 10% of the good's transaction value (FOB) or total cost, and it meets all other requirements. A good subject to a regional value content rule does not need to meet it if all non-originating materials are no more than 10% of that value. Exceptions apply (Annex 4-A, e.g. certain dairy, sugar, juice and coffee materials, and materials in the same subheading as a Chapter 1&ndash;27 good), and textiles (Chapters 50&ndash;63) use a 10% weight test with a 7% limit on elastomeric content. A good that relies on de minimis is criterion B (or D), not C.</p>
+    </details>
+    <div class="actions">
+      <button class="btn ghost" data-goto="2">&larr; Back</button>
+      <button class="btn primary" data-goto="4">Next: sign &rarr;</button>
+    </div>
+    <div id="step3Msg" class="status"></div>
+  </section>
+
+  <!-- ================= STEP 4 ================= -->
+  <section class="card hidden" id="step4">
+    <h2>Step 4 &mdash; Certification, signature and PDF</h2>
+    <div class="cert-statement">
+      I certify that the goods described in this document qualify as originating and the information contained in this document is true and accurate. I assume responsibility for proving such representations and agree to maintain and present upon request or to make available during a verification visit, documentation necessary to support this certification.
+    </div>
+    <div class="grid2">
+      <label>Authorized name <input id="signName"></label>
+      <label>Title <input id="signTitle"></label>
+      <label>Company <input id="signCompany"></label>
+      <label>Date <input type="date" id="signDate"></label>
+      <label>Phone <input id="signPhone"></label>
+      <label>Email <input id="signEmail" type="email"></label>
+    </div>
+
+    <div class="sig-area">
+      <div class="sig-label">Signature <span class="hint">draw with mouse or finger</span></div>
+      <canvas id="sigPad" width="600" height="160"></canvas>
+      <div class="actions left"><button class="btn tiny" id="sigClear">Clear signature</button></div>
+    </div>
+
+    <label class="check"><input type="checkbox" id="ackReview">
+      I understand the origin analysis is preliminary, I have verified the information, and I am responsible for this certification.</label>
+
+    <div class="actions">
+      <button class="btn ghost" data-goto="3">&larr; Back</button>
+      <button class="btn ghost" id="previewPdf">Preview unsigned draft</button>
+      <button class="btn primary" id="makePdf">Download signed PDF</button>
+    </div>
+    <div id="step4Msg" class="status"></div>
+  </section>
+
+  <!-- AD SLOT: bottom -->
+  <div class="ad-slot" aria-hidden="true">
+    <!-- <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3091236865638643" data-ad-slot="2222222222" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script> -->
+  </div>
+
+  <section class="card contact" id="contact">
+    <h2>Need a professional review?</h2>
+    <p>Rules of origin, automotive RVC/LVC, steel and aluminum requirements and supplier certifications can be complex. I can review your BOM, classification and certification before you sign.</p>
+    <div class="contact-grid">
+      <div>
+        <div class="contact-name">Michelle Liu, CCS, CTCS</div>
+        <div class="muted">Canada&ndash;U.S. Trade Compliance &middot; 15+ years &middot; English / 한국어</div>
+      </div>
+      <div class="contact-links">
+        <a class="btn primary" href="mailto:michellekang96@yahoo.ca?subject=USMCA%20origin%20review%20request">Email me</a>
+        <a class="btn ghost" href="https://www.linkedin.com/in/jeong-hiy-liu-811aa847" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="card disclaimer" id="disclaimer">
+    <h2>Disclaimer</h2>
+    <p><strong>Depending on the product, the product-specific rule of origin is different. Please have a customs compliance professional or consultant review the result before you rely on it.</strong></p>
+    <p>This tool provides a preliminary analysis (a rule-based calculation, or an optional AI-assisted review) for general information only. It is not legal advice, not a binding ruling and not a decision of U.S. Customs and Border Protection, the Canada Border Services Agency or Mexican customs. USMCA/CUSMA product-specific rules of origin (Annex 4-B and its Appendix for automotive goods) vary by tariff classification, and the result depends entirely on the accuracy and completeness of the product description, HS code, bill of materials, values and supplier origin information you provide. Automated analysis can be wrong: the free checker does not verify your HS classification or your suppliers' origin claims, and its built-in rules cover only some chapters.</p>
+    <p>The person who signs a certification of origin is responsible for its accuracy and must keep the records that support it (generally at least five years). Incorrect certifications can lead to duty assessments, penalties and loss of preferential treatment. Use of this tool does not create a client relationship. The author accepts no liability for any loss arising from its use.</p>
+    <p class="small muted">The USMCA has no mandatory certificate form; a certification is valid when it contains the minimum data elements in USMCA Annex 5-A. The layout used here follows the commonly used template format.</p>
+  </section>
+
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    &copy; <span id="yr"></span> Michelle Liu &middot; <a href="https://jeonghiykang-tech.github.io/">jeonghiykang-tech.github.io</a> &middot; <a href="#disclaimer">Disclaimer</a> &middot; <a href="privacy.html">Privacy</a>
+  </div>
+</footer>
+
+<script src="rules.js"></script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
