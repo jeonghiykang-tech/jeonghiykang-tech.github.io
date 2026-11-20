@@ -44,6 +44,12 @@ function goto(n) {
   window.scrollTo({ top: $("#stepper").offsetTop - 10, behavior: "smooth" });
 }
 $$("[data-goto]").forEach(b => b.addEventListener("click", () => goto(+b.dataset.goto)));
+$$("#stepper li").forEach(li => {
+  li.setAttribute("role", "button");
+  li.tabIndex = 0;
+  li.addEventListener("click", () => goto(+li.dataset.step));
+  li.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goto(+li.dataset.step); } });
+});
 
 /* ---------------- BOM table ---------------- */
 const E = window.USMCA_ENGINE;

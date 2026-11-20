@@ -22,6 +22,9 @@ a{color:var(--accent)}
 .steps{display:flex;gap:6px;list-style:none;padding:0;margin:14px 0;counter-reset:s}
 .steps li{flex:1;padding:9px 10px;background:#e3e8ef;color:var(--muted);border-radius:6px;font-size:13px;font-weight:600;counter-increment:s}
 .steps li::before{content:counter(s) ". "}
+.steps li{cursor:pointer;user-select:none;transition:background .15s}
+.steps li:hover:not(.active){background:#d3dce7;color:var(--navy)}
+.steps li:focus-visible{outline:2px solid #9cc0e8;outline-offset:2px}
 .steps li.active{background:var(--navy-2);color:#fff}
 .steps li.done{background:#cfe0f1;color:var(--navy)}
 
