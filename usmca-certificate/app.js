@@ -169,15 +169,18 @@ $("#dlTemplate").addEventListener("click", e => {
 
 /* ---------------- rule panel ---------------- */
 state.ruleOpts = {};
+const ANNEX_4B_URL = "https://www.international.gc.ca/trade-commerce/trade-agreements-accords-commerciaux/agr-acc/cusma-aceum/text-texte/04.aspx?lang=eng";
+const RESTRICTED_CH = { "72": "Iron and steel (Chapter 72)", "73": "Articles of iron or steel (Chapter 73)", "87": "Vehicles and vehicle parts (Chapter 87)" };
+function restrictedReason() {
+  if ($("#prodAuto").checked) return "Automotive part or component for a motor vehicle";
+  const ch = E.digits($("#prodHts").value).slice(0, 2);
+  return E.digits($("#prodHts").value).length >= 2 ? RESTRICTED_CH[ch] || "" : "";
+}
 function currentRule() {
+  if (restrictedReason()) return { kind: "restricted", reason: restrictedReason() };
   const hs = E.digits($("#prodHts").value);
   if (hs.length < 6) return { kind: "none" };
-  const base = E.findRule(hs);
-  if (base && E.covered(hs)) {
-    const resolved = E.resolveRule(base, state.ruleOpts);
-    return { kind: "db", base, resolved, citation: (base.auto ? "USMCA Appendix to Annex 4-B (Automotive Goods), " : "USMCA Annex 4-B, ") + (base.from === base.to ? E.fmtHS(base.from) : E.fmtHS(base.from) + "-" + E.fmtHS(base.to)) };
-  }
-  // manual rule for chapters not in the database
+  // rule entered by the customer from USMCA Annex 4-B
   const m = state.manual || {};
   const alts = [];
   if (m.ts) alts.push({ ts: m.ts === "NONE" ? null : m.ts, except: m.except && m.except.length ? m.except : undefined,
@@ -187,39 +190,30 @@ function currentRule() {
   return { kind: "manual", resolved: { alts, text, notes: [], warnings: [] }, base: { from: hs.slice(0, 6), to: hs.slice(0, 6) }, citation: "Rule entered by user for " + E.fmtHS(hs.slice(0, 6)) };
 }
 
+function restrictedHtml(reason) {
+  return `<div class="restricted">
+    <div class="rule-head"><strong>Professional review recommended: ${esc(reason)}</strong></div>
+    <p class="small">USMCA rules for steel and automotive goods include extra conditions that a simple calculator cannot check reliably &mdash; for example the 70% originating-steel-by-weight test, the Automotive Appendix (regional value content up to 75% under net cost, core and principal parts tables, labor value content, steel and aluminum purchases) and Party-specific tariff items. The free checker therefore does not cover these goods.</p>
+    <p class="small">I specialize in steel and automotive parts (HS chapters 72, 73 and 87). Send me your BOM and I will review the origin before you sign.</p>
+    <div class="actions left"><a class="btn primary" href="mailto:michellekang96@yahoo.ca?subject=USMCA%20origin%20review%20-%20steel%2Fautomotive">Email me for a review</a>
+      <a class="btn ghost" href="https://www.linkedin.com/in/jeong-hiy-liu-811aa847" target="_blank" rel="noopener">LinkedIn</a>
+      <span class="small muted" style="align-self:center">michellekang96@yahoo.ca</span></div>
+    <p class="small muted" style="margin-bottom:0">If a professional has already determined the origin, you can still complete the certificate with &ldquo;Skip &mdash; I already know the origin&rdquo;.</p>
+  </div>`;
+}
+
 function renderRulePanel() {
   const p = $("#rulePanel"), cr = currentRule();
   if (cr.kind === "none") { p.classList.add("hidden"); return; }
   p.classList.remove("hidden");
-  const src = `<a href="${USMCA_RULES.source}" target="_blank" rel="noopener">official text</a>`;
-  if (cr.kind === "db") {
-    const r = cr.resolved, b = cr.base, o = state.ruleOpts;
-    let ctl = "";
-    if (b.auto) {
-      ctl += `<div class="grid3">
-        <label>Vehicle use <select id="ruleCtx"><option value="">Select&hellip;</option>
-          <option value="pvlt"${o.context === "pvlt" ? " selected" : ""}>Passenger vehicle / light truck</option>
-          <option value="ht"${o.context === "ht" ? " selected" : ""}>Heavy truck</option>
-          <option value="other"${o.context === "other" ? " selected" : ""}>Other (other vehicles, aftermarket)</option></select></label>`;
-      if (r.variants) ctl += `<label>Type of good <select id="ruleVar"><option value="">Select&hellip;</option>${r.variants.map(v => `<option value="${v.key}"${o.variant === v.key ? " selected" : ""}>${esc(v.label)}</option>`).join("")}</select></label>`;
-      if (o.context === "pvlt" || o.context === "ht") {
-        const tabs = o.context === "pvlt" ? ["A1", "B", "C"] : ["D", "E"];
-        ctl += `<label>Appendix table <select id="ruleTable"><option value="">Not listed / not sure</option>${tabs.map(t => `<option value="${t}"${o.table === t ? " selected" : ""}>${esc(USMCA_RULES.appendix[t].label)}</option>`).join("")}</select></label>`;
-      }
-      ctl += "</div>";
-    }
-    const body = r.unsupported
-      ? `<div class="warn-box">${esc(r.notes.join(" "))}</div>`
-      : r.needs.length ? `<div class="muted small">Select the ${r.needs.join(" and ")} to see the rule that applies.</div>`
-      : `<ol class="rule-text">${r.text.map(t => `<li>${esc(t)}</li>`).join("")}</ol>${r.notes.concat(r.warnings).map(n => `<div class="warn-box small">${esc(n)}</div>`).join("")}`;
-    p.innerHTML = `<div class="rule-head"><strong>Product-specific rule found:</strong> ${esc(cr.citation)} <span class="tag y">built-in</span></div>${ctl}${body}
-      <div class="small muted">Source: ${src} (CUSMA consolidation, Global Affairs Canada). Rules currently in force only.</div>`;
-    const bind = (id, k) => { const el = $("#" + id); if (el) el.addEventListener("change", () => { state.ruleOpts[k] = el.value; if (k === "context") { state.ruleOpts.variant = ""; state.ruleOpts.table = ""; } renderRulePanel(); }); };
-    bind("ruleCtx", "context"); bind("ruleVar", "variant"); bind("ruleTable", "table");
+  p.classList.toggle("is-restricted", cr.kind === "restricted");
+  const src = `<a href="${ANNEX_4B_URL}" target="_blank" rel="noopener">USMCA Annex 4-B</a>`;
+  if (cr.kind === "restricted") {
+    p.innerHTML = restrictedHtml(cr.reason);
   } else {
     const m = state.manual || {};
-    p.innerHTML = `<div class="rule-head"><strong>HS chapter ${esc(E.digits($("#prodHts").value).slice(0, 2))} is not in the free rule database yet</strong> (built-in: chapters 72, 73 and 87).</div>
-      <p class="small">Look up your rule in Annex 4-B (${src}) and enter it below, or use “Check with my Claude”.</p>
+    p.innerHTML = `<div class="rule-head"><strong>Product-specific rule for ${esc(E.fmtHS(E.digits($("#prodHts").value).slice(0, 6)))}</strong></div>
+      <p class="small">Find the rule for your HS code in ${src} (search the page for your heading, e.g. &ldquo;${esc(E.digits($("#prodHts").value).slice(0, 2) + "." + E.digits($("#prodHts").value).slice(2, 4))}&rdquo;) and enter it below. Not sure? Use &ldquo;Check with my Claude&rdquo;.</p>
       <div class="grid3">
         <label>Alternative 1 — tariff change <select id="mTs">
           <option value="">Select&hellip;</option><option value="CC">Change of chapter (from any other chapter)</option>
@@ -244,6 +238,14 @@ function renderRulePanel() {
   }
 }
 $("#prodHts").addEventListener("input", () => { state.ruleOpts = {}; renderRulePanel(); });
+$("#prodAuto").addEventListener("change", renderRulePanel);
+function blockIfRestricted(st) {
+  const r = restrictedReason();
+  if (!r) return false;
+  setStatus(st, `${esc(r)}: the free checker does not cover steel or automotive goods. Please <a href="#rulePanel">ask for a professional review</a>.`, "error");
+  $("#rulePanel").scrollIntoView({ behavior: "smooth", block: "center" });
+  return true;
+}
 
 /* ---------------- analysis ---------------- */
 function productInput() {
@@ -274,10 +276,10 @@ function bomCsv() {
 
 $("#freeCheckBtn").addEventListener("click", () => {
   const st = $("#analyzeStatus"), input = productInput();
+  if (blockIfRestricted(st)) return;
   const missing = checkBasics(input);
   if (missing.length) return setStatus(st, "Please provide: " + missing.join(", ") + ".", "error");
   const cr = currentRule();
-  if (cr.kind === "db" && cr.resolved.needs.length) return setStatus(st, `Please select the ${cr.resolved.needs.join(" and ")} in the rule box.`, "error");
   if (cr.kind === "manual" && !cr.resolved.alts.length) return setStatus(st, "Please enter the product-specific rule in the rule box (or use “Check with my Claude”).", "error");
   const result = E.evaluate({ ...input, bom: state.bomRows, rule: cr.resolved, ruleBase: cr.base, citation: cr.citation, manual: cr.kind === "manual" });
   state.lastResult = result; state.lastInput = input;
@@ -287,10 +289,11 @@ $("#freeCheckBtn").addEventListener("click", () => {
 
 $("#claudeBtn").addEventListener("click", async () => {
   const st = $("#analyzeStatus"), input = productInput();
+  if (blockIfRestricted(st)) return;
   const missing = checkBasics(input, false);
   if (missing.length) return setStatus(st, "Please provide: " + missing.join(", ") + ".", "error");
   const cr = currentRule();
-  const ruleTxt = cr.kind === "db" && cr.resolved.text.length ? cr.resolved.text.map(t => "- " + t).join("\n") : "(not provided — please identify the rule in USMCA Annex 4-B yourself)";
+  const ruleTxt = cr.kind === "manual" && cr.resolved.alts.length ? "As entered by the user (verify against Annex 4-B): " + cr.resolved.text.join(" OR ") : "(not provided — please identify the rule in USMCA Annex 4-B yourself)";
   const free = state.lastResult && state.lastResult.engine === "free" ? `\nA free rule-based checker gave this preliminary result: ${state.lastResult.status}, criterion ${state.lastResult.origin_criterion || "-"}, method ${state.lastResult.method_of_qualification || "-"}. Verify it independently.\n` : "";
   const prompt = `You are a North American customs compliance analyst. Make a PRELIMINARY USMCA/CUSMA origin determination (Chapter 4, Annex 4-B, Appendix for automotive goods, Article 4.12 de minimis).
 
@@ -326,6 +329,7 @@ $("#skipBtn").addEventListener("click", () => { if (!state.goods.length) addGood
 
 async function aiAnalyze() {
   const st = $("#analyzeStatus"), input = productInput();
+  if (blockIfRestricted(st)) return;
   const missing = checkBasics(input, !state.bomPdf);
   if (missing.length) return setStatus(st, "Please provide: " + missing.join(", ") + ".", "error");
   if (state.bomPdf && !state.bomRows.length) input.bomPdfBase64 = state.bomPdf.base64; else input.bomText = bomCsv();
@@ -571,7 +575,7 @@ $("#goodsTable").addEventListener("click", e => {
 $("#addRow").addEventListener("click", () => addGood({}));
 $("#anotherCheck").addEventListener("click", () => {
   ["#prodDesc", "#prodHts", "#prodTV", "#prodNC", "#prodTC", "#prodNotes"].forEach(s => ($(s).value = ""));
-  $("#prodCountry").value = ""; state.bomRows = []; state.bomPdf = null; state.ruleOpts = {}; state.manual = null; renderBom(); renderRulePanel(); $("#fileName").textContent = ""; fileInput.value = "";
+  $("#prodCountry").value = ""; $("#prodAuto").checked = false; state.bomRows = []; state.bomPdf = null; state.ruleOpts = {}; state.manual = null; renderBom(); renderRulePanel(); $("#fileName").textContent = ""; fileInput.value = "";
   $("#result").classList.add("hidden");
   goto(1);
 });

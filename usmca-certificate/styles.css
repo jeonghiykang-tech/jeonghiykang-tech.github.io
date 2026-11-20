@@ -129,3 +129,6 @@ table.bom td input,table.bom td select{min-width:0}
 @media(max-width:700px){.grid3{grid-template-columns:1fr}}
 table.bom th:nth-child(1){width:52px} table.bom th:nth-child(2){width:100px} table.bom th:nth-child(4){width:105px}
 table.bom th:nth-child(5){width:80px} table.bom th:nth-child(6){width:95px} table.bom th:nth-child(7),table.bom th:nth-child(8){width:90px}
+
+.note-box{background:#f4f7fb;border-left:4px solid var(--navy-2);border-radius:6px;padding:9px 12px;margin:6px 0 14px}
+.rule-panel.is-restricted{background:#fff8ec;border-color:#e6c27a}

@@ -24,6 +24,7 @@
   function findRule(hs) {
     const d = digits(hs).slice(0, 6);
     if (d.length < 6) return null;
+    if (!window.USMCA_RULES) return null;
     const list = window.USMCA_RULES.list;
     // a subheading-level rule wins over a heading-level rule
     let best = null;
@@ -34,7 +35,7 @@
     }
     return best;
   }
-  const covered = hs => window.USMCA_RULES.coveredChapters.includes(digits(hs).slice(0, 2));
+  const covered = hs => !!window.USMCA_RULES && window.USMCA_RULES.coveredChapters.includes(digits(hs).slice(0, 2));
 
   /* Pick the rule text/alternatives for the chosen context, variant and Appendix table */
   function resolveRule(rule, opts = {}) {
@@ -57,7 +58,7 @@
     out.notes.push(...(node.notes || []));
 
     // Appendix Tables A.1-E override the RVC thresholds for parts used in vehicles
-    const T = opts.table && window.USMCA_RULES.appendix[opts.table];
+    const T = opts.table && window.USMCA_RULES && window.USMCA_RULES.appendix[opts.table];
     if (T) {
       let nc = T.nc, tv = T.tv;
       if (T.byDate) {

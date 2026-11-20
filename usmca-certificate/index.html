@@ -5,12 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Free USMCA / CUSMA Certification of Origin Generator with Free Origin Check | Michelle Liu</title>
 <meta name="description" content="Upload your bill of materials, get a free preliminary USMCA/CUSMA rules-of-origin check (tariff shift, RVC, de minimis) (origin criterion, method of qualification, country of origin), then create and sign a USMCA Certification of Origin PDF.">
-<link rel="canonical" href="https://jeonghiykang-tech.github.io/usmca-certificate/">
 <link rel="stylesheet" href="styles.css">
 
 <!-- ============ GOOGLE ADSENSE ============
-  After AdSense approval, replace ca-pub-3091236865638643 with your publisher ID and remove the comment markers.
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3091236865638643" crossorigin="anonymous"></script>
+  After AdSense approval, replace ca-pub-XXXXXXXXXXXXXXXX with your publisher ID and remove the comment markers.
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 ========================================= -->
 
 <!-- SheetJS (Excel reader). Official CDN build; local copy is the fallback. -->
@@ -26,7 +25,7 @@
       <div class="brand">USMCA / CUSMA Certification of Origin</div>
       <div class="tagline">BOM upload &rarr; free origin check &rarr; signed certification PDF</div>
     </div>
-    <a class="header-link" href="../">&larr; Home</a>
+    <a class="header-link" href="https://jeonghiykang-tech.github.io/">&larr; Home</a>
   </div>
 </header>
 
@@ -40,7 +39,7 @@
 
   <!-- AD SLOT: top -->
   <div class="ad-slot" aria-hidden="true">
-    <!-- <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3091236865638643" data-ad-slot="1111111111" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <!-- <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="1111111111" data-ad-format="auto" data-full-width-responsive="true"></ins>
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script> -->
   </div>
 
@@ -54,14 +53,15 @@
   <!-- ================= STEP 1 ================= -->
   <section class="card" id="step1">
     <h2>Step 1 &mdash; Free origin check</h2>
-    <p class="muted">Enter your finished product and its bill of materials. The free checker applies the USMCA product-specific rule for your HS code (built-in for chapters 72, 73 and 87), tests the tariff shift, regional value content and de minimis, and recommends the origin criterion (field 8), method of qualification (field 10) and country of origin (field 11).</p>
+    <p class="muted">For general goods. Enter your finished product, the USMCA product-specific rule for its HS code and the bill of materials. The free checker tests the tariff shift, regional value content and de minimis, and recommends the origin criterion (field 8), method of qualification (field 10) and country of origin (field 11).</p>
+    <p class="note-box small"><strong>Steel (HS chapters 72&ndash;73) and automotive parts</strong> are not covered by the free checker &mdash; their rules have extra steel and automotive conditions. <a href="#contact">Ask for a professional review</a>.</p>
 
     <div class="grid2">
       <label class="full">Final product description <span class="req">*</span>
-        <textarea id="prodDesc" rows="2" placeholder="e.g. Laser-welded steel door inner blank for passenger vehicles"></textarea>
+        <textarea id="prodDesc" rows="2" placeholder="e.g. Wooden office chair with upholstered seat"></textarea>
       </label>
       <label>HTS / HS code of the final product <span class="req">*</span>
-        <input id="prodHts" placeholder="e.g. 8708.29.5160">
+        <input id="prodHts" placeholder="e.g. 9401.61.4011">
       </label>
       <label>Country where the product is produced <span class="req">*</span>
         <select id="prodCountry">
@@ -83,6 +83,7 @@
       <label>Currency
         <select id="prodCur"><option>USD</option><option>CAD</option><option>MXN</option></select>
       </label>
+      <label class="check full" style="margin-top:2px"><input type="checkbox" id="prodAuto"> This product is a part or component for a motor vehicle (car, truck, bus, etc.)</label>
       <label class="full">Production notes <span class="hint">optional &mdash; processes performed, supplier USMCA certifications on file, etc.</span>
         <textarea id="prodNotes" rows="2"></textarea>
       </label>
@@ -264,7 +265,7 @@
 
   <!-- AD SLOT: bottom -->
   <div class="ad-slot" aria-hidden="true">
-    <!-- <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3091236865638643" data-ad-slot="2222222222" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <!-- <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="2222222222" data-ad-format="auto" data-full-width-responsive="true"></ins>
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script> -->
   </div>
 
@@ -286,7 +287,7 @@
   <section class="card disclaimer" id="disclaimer">
     <h2>Disclaimer</h2>
     <p><strong>Depending on the product, the product-specific rule of origin is different. Please have a customs compliance professional or consultant review the result before you rely on it.</strong></p>
-    <p>This tool provides a preliminary analysis (a rule-based calculation, or an optional AI-assisted review) for general information only. It is not legal advice, not a binding ruling and not a decision of U.S. Customs and Border Protection, the Canada Border Services Agency or Mexican customs. USMCA/CUSMA product-specific rules of origin (Annex 4-B and its Appendix for automotive goods) vary by tariff classification, and the result depends entirely on the accuracy and completeness of the product description, HS code, bill of materials, values and supplier origin information you provide. Automated analysis can be wrong: the free checker does not verify your HS classification or your suppliers' origin claims, and its built-in rules cover only some chapters.</p>
+    <p>This tool provides a preliminary analysis (a rule-based calculation, or an optional AI-assisted review) for general information only. It is not legal advice, not a binding ruling and not a decision of U.S. Customs and Border Protection, the Canada Border Services Agency or Mexican customs. USMCA/CUSMA product-specific rules of origin (Annex 4-B and its Appendix for automotive goods) vary by tariff classification, and the result depends entirely on the accuracy and completeness of the product description, HS code, bill of materials, values and supplier origin information you provide. Automated analysis can be wrong: the free checker relies on the rule you enter and does not verify your HS classification or your suppliers' origin claims. Steel (Chapters 72&ndash;73) and automotive goods are not covered by the free checker.</p>
     <p>The person who signs a certification of origin is responsible for its accuracy and must keep the records that support it (generally at least five years). Incorrect certifications can lead to duty assessments, penalties and loss of preferential treatment. Use of this tool does not create a client relationship. The author accepts no liability for any loss arising from its use.</p>
     <p class="small muted">The USMCA has no mandatory certificate form; a certification is valid when it contains the minimum data elements in USMCA Annex 5-A. The layout used here follows the commonly used template format.</p>
   </section>
@@ -299,7 +300,6 @@
   </div>
 </footer>
 
-<script src="rules.js"></script>
 <script src="engine.js"></script>
 <script src="app.js"></script>
 </body>
